@@ -1,0 +1,8 @@
+<!-- Avatar default untuk pegawai yang belum memiliki foto profil. -->
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="160" height="160" rx="32" fill="#111827"/>
+    <circle cx="80" cy="61" r="29" fill="#334155"/>
+    <path d="M31 134C37.6 107.4 56.2 95 80 95C103.8 95 122.4 107.4 129 134" fill="#334155"/>
+    <path d="M31 134C37.6 107.4 56.2 95 80 95C103.8 95 122.4 107.4 129 134" stroke="#06B6D4" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="80" cy="61" r="29" stroke="#8B5CF6" stroke-width="6"/>
+</svg>
