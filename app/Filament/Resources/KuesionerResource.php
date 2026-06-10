@@ -196,6 +196,10 @@ class KuesionerResource extends Resource
                     ->counts('pertanyaans')
                     ->label('Jumlah Soal')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('responses_count')
+                    ->counts('responses')
+                    ->label('Jumlah Respon')
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('triwulan')

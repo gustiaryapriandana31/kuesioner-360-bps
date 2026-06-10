@@ -97,9 +97,37 @@
                         <select id="kuesioner_id" name="kuesioner_id" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                             <option value="">-- Pilih Kuesioner --</option>
                             @foreach($kuesioners as $k)
-                                <option value="{{ $k->id }}">[{{ $k->kode }}] {{ $k->judul }}</option>
+                                <option value="{{ $k->id }}" data-has-responses="{{ $k->responses_count > 0 ? 'true' : 'false' }}" data-responses-count="{{ $k->responses_count }}">
+                                    [{{ $k->kode }}] {{ $k->judul }} ({{ $k->responses_count }} respon)
+                                </option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <!-- Box Peringatan Overwrite Data Respon -->
+                    <div id="warning-replace-container" class="hidden rounded-md bg-amber-50 dark:bg-amber-900/40 p-4 border border-amber-200 dark:border-amber-800 space-y-3">
+                        <div class="flex items-start">
+                            <div class="shrink-0 text-amber-600 dark:text-amber-400">
+                                ⚠️
+                            </div>
+                            <div class="ml-3 text-sm text-amber-850 dark:text-amber-200">
+                                <p class="font-bold text-amber-900 dark:text-amber-300">Kuesioner ini sudah memiliki data respon!</p>
+                                <p class="mt-1 leading-relaxed">
+                                    Kuesioner terpilih saat ini memiliki <strong id="warning-responses-count" class="underline font-black text-amber-950 dark:text-amber-100">0</strong> data respon.
+                                    Melakukan import baru akan <strong class="text-red-600 dark:text-red-400 font-extrabold uppercase">menghapus permanen</strong> data respon lama kuesioner ini beserta seluruh detail jawabannya dan mereplace dengan data baru.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start pt-2 border-t border-amber-200/55">
+                            <div class="flex items-center h-5">
+                                <input id="agree_replace" name="agree_replace" type="checkbox" value="1" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded cursor-pointer">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="agree_replace" class="font-medium text-gray-800 dark:text-gray-200 cursor-pointer select-none">
+                                    Saya mengerti dan menyetujui untuk menghapus seluruh data respon lama kuesioner ini.
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
 
@@ -127,7 +155,7 @@
                 </div>
 
                 <div>
-                    <button type="submit" id="btn-import" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
+                    <button type="submit" id="btn-import" disabled class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
                         <span id="btn-text">Mulai Import</span>
                         <svg id="btn-spinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -146,6 +174,57 @@
     </div>
 
     <script>
+        function updateSubmitButtonState() {
+            const select = document.getElementById('kuesioner_id');
+            const selectedOption = select.options[select.selectedIndex];
+            const btn = document.getElementById('btn-import');
+            
+            if (!selectedOption || !selectedOption.value) {
+                btn.disabled = true;
+                return;
+            }
+
+            const hasResponses = selectedOption.getAttribute('data-has-responses') === 'true';
+            const checkbox = document.getElementById('agree_replace');
+
+            if (hasResponses) {
+                btn.disabled = !checkbox.checked;
+            } else {
+                btn.disabled = false;
+            }
+        }
+
+        document.getElementById('kuesioner_id').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            if (!selectedOption || !selectedOption.value) {
+                document.getElementById('warning-replace-container').classList.add('hidden');
+                document.getElementById('agree_replace').required = false;
+                document.getElementById('agree_replace').checked = false;
+                updateSubmitButtonState();
+                return;
+            }
+
+            const hasResponses = selectedOption.getAttribute('data-has-responses') === 'true';
+            const responsesCount = selectedOption.getAttribute('data-responses-count') || '0';
+            
+            const warningContainer = document.getElementById('warning-replace-container');
+            const countSpan = document.getElementById('warning-responses-count');
+            const checkbox = document.getElementById('agree_replace');
+            
+            if (hasResponses) {
+                warningContainer.classList.remove('hidden');
+                countSpan.textContent = responsesCount;
+                checkbox.required = true;
+            } else {
+                warningContainer.classList.add('hidden');
+                checkbox.required = false;
+                checkbox.checked = false;
+            }
+            updateSubmitButtonState();
+        });
+
+        document.getElementById('agree_replace').addEventListener('change', updateSubmitButtonState);
+
         document.getElementById('import-form').addEventListener('submit', function() {
             const btn = document.getElementById('btn-import');
             const text = document.getElementById('btn-text');
@@ -155,6 +234,9 @@
             text.textContent = 'Memproses File...';
             spinner.classList.remove('hidden');
         });
+
+        // Initialize state on load
+        window.addEventListener('DOMContentLoaded', updateSubmitButtonState);
     </script>
 </body>
 </html>

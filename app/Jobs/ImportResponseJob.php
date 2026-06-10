@@ -18,16 +18,18 @@ class ImportResponseJob implements ShouldQueue
     protected $kuesionerId;
     protected $status;
     protected $userId;
+    protected $deleteExisting;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(string $filePath, int $kuesionerId, string $status, int $userId)
+    public function __construct(string $filePath, int $kuesionerId, string $status, int $userId, bool $deleteExisting = false)
     {
         $this->filePath = $filePath;
         $this->kuesionerId = $kuesionerId;
         $this->status = $status;
         $this->userId = $userId;
+        $this->deleteExisting = $deleteExisting;
     }
 
     /**
@@ -37,7 +39,7 @@ class ImportResponseJob implements ShouldQueue
     {
         $absolutePath = storage_path('app/' . $this->filePath);
 
-        $result = $service->import($absolutePath, $this->kuesionerId, $this->status, $this->userId);
+        $result = $service->import($absolutePath, $this->kuesionerId, $this->status, $this->userId, $this->deleteExisting);
 
         // Save result in cache
         $result['selesai_pada'] = now()->toIso8601String();

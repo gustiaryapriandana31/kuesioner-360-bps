@@ -27,7 +27,7 @@ class ImportResponseService
     /**
      * @return array{success: bool, message: string, stats?: array}
      */
-    public function import(string $absolutePath, int $kuesionerId, string $status, int $userId): array
+    public function import(string $absolutePath, int $kuesionerId, string $status, int $userId, bool $deleteExisting = false): array
     {
         // Tingkatkan batas waktu eksekusi script menjadi 5 menit (300 detik)
         // karena proses baca Excel dan pencarian fuzzy text bisa memakan waktu lama.
@@ -107,6 +107,10 @@ class ImportResponseService
         DB::beginTransaction();
 
         try {
+            if ($deleteExisting) {
+                $logger->info("Menghapus data respon lama untuk kuesioner ID: {$kuesionerId}");
+                Response::where('kuesioner_id', $kuesionerId)->delete();
+            }
             foreach ($dataRows as $rowIndex => $row) {
                 $timestampRaw = $row[0] ?? null;
                 $namaPenilai  = trim((string) ($row[1] ?? ''));

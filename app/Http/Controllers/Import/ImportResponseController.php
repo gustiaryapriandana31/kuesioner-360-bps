@@ -18,9 +18,10 @@ class ImportResponseController extends Controller
      */
     public function index(Request $request): View
     {
-        $kuesioners = Kuesioner::orderByDesc('tahun')
+        $kuesioners = Kuesioner::withCount('responses')
+            ->orderByDesc('tahun')
             ->orderBy('triwulan')
-            ->get(['id', 'kode', 'judul', 'triwulan', 'tahun', 'status']);
+            ->get();
 
         // Ambil hasil import terakhir (jika ada) dari cache
         $importResult = cache()->get("import_response_result_{$request->user()->id}");
@@ -33,19 +34,30 @@ class ImportResponseController extends Controller
      */
     public function import(Request $request): RedirectResponse
     {
-        $request->validate([
+        $kuesioner = Kuesioner::query()->findOrFail((int) $request->kuesioner_id);
+        $hasResponses = $kuesioner->responses()->exists();
+
+        $rules = [
             'kuesioner_id' => ['required', 'exists:kuesioners,id'],
             'file'         => ['required', 'file', 'mimes:xlsx', 'max:20480'],
-        ], [
+        ];
+
+        if ($hasResponses) {
+            $rules['agree_replace'] = ['required', 'accepted'];
+        }
+
+        $request->validate($rules, [
             'kuesioner_id.required' => 'Pilih kuesioner terlebih dahulu.',
             'kuesioner_id.exists'   => 'Kuesioner tidak ditemukan.',
             'file.required'         => 'File Excel wajib diunggah.',
             'file.mimes'            => 'File harus berformat .xlsx.',
             'file.max'              => 'Ukuran file maksimal 20 MB.',
+            'agree_replace.required' => 'Kuesioner ini sudah memiliki data respon. Anda harus menyetujui penghapusan data lama.',
+            'agree_replace.accepted' => 'Anda harus mencentang persetujuan untuk menimpa data respon lama.',
         ]);
 
-        $kuesioner = Kuesioner::query()->findOrFail((int) $request->kuesioner_id);
         $status = $kuesioner->status === 'closed' ? 'submitted' : 'draft';
+        $deleteExisting = $request->boolean('agree_replace', false);
 
         // Simpan file di storage/app/imports/temp/
         $path = $request->file('file')->store('imports/temp');
@@ -59,6 +71,7 @@ class ImportResponseController extends Controller
             (int) $request->kuesioner_id,
             $status,
             $request->user()->id,
+            $deleteExisting
         );
 
         return redirect()
