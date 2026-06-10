@@ -65,7 +65,30 @@ class ListKuesioners extends ListRecords
                             if (! $kuesionerId) return false;
                             $kuesioner = Kuesioner::find($kuesionerId);
                             return $kuesioner && $kuesioner->responses()->exists();
-                        }),
+                        })
+                        ->extraAttributes([
+                            'x-init' => '
+                                $nextTick(() => {
+                                    let submitBtn = $el.closest("form")?.querySelector("button[type=submit]");
+                                    let checkbox = $el.querySelector("input[type=checkbox]");
+                                    if (submitBtn && checkbox) {
+                                        submitBtn.disabled = !checkbox.checked;
+                                    }
+                                });
+                                return () => {
+                                    let submitBtn = $el.closest("form")?.querySelector("button[type=submit]");
+                                    if (submitBtn) {
+                                        submitBtn.disabled = false;
+                                    }
+                                };
+                            ',
+                            'x-on:change' => '
+                                let submitBtn = $el.closest("form")?.querySelector("button[type=submit]");
+                                if (submitBtn) {
+                                    submitBtn.disabled = !$event.target.checked;
+                                }
+                            '
+                        ]),
 
                     Forms\Components\FileUpload::make('file')
                         ->label('File Excel (.xlsx)')
@@ -73,8 +96,7 @@ class ListKuesioners extends ListRecords
                         ->disk('local')
                         ->directory('imports/temp')
                         ->maxSize(20480)
-                        ->required()
-                        ->live(),
+                        ->required(),
                 ])
                 ->action(function (array $data): void {
                     $absolutePath = \Illuminate\Support\Facades\Storage::disk('local')->path($data['file']);
@@ -111,22 +133,7 @@ class ListKuesioners extends ListRecords
                 })
                 ->modalHeading('Import Response Excel')
                 ->modalDescription('Upload file hasil dari Google Forms. Mohon tunggu sesaat setelah klik import.')
-                ->modalSubmitActionLabel('Mulai Import')
-                ->modalSubmitAction(function (\Filament\Actions\StaticAction $action, Forms\Get $get) {
-                    $kuesionerId = $get('kuesioner_id');
-                    if (! $kuesionerId || empty($get('file'))) {
-                        return $action->disabled(true);
-                    }
-                    $kuesioner = Kuesioner::find($kuesionerId);
-                    if (! $kuesioner) {
-                        return $action->disabled(true);
-                    }
-                    $hasResponses = $kuesioner->responses()->exists();
-                    if ($hasResponses && ! $get('agree_replace')) {
-                        return $action->disabled(true);
-                    }
-                    return $action->disabled(false);
-                }), 
+                ->modalSubmitActionLabel('Mulai Import'), 
             Actions\Action::make('copy_tw')
                 ->label('Copy Kuesioner')
                 ->icon('heroicon-o-document-duplicate')
