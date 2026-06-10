@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pertanyaans', function (Blueprint $table) {
-            // Drop indexes first
+            // 1. Drop foreign key constraint first, so the indexes are no longer needed by it
+            $table->dropForeign(['kuesioner_id']);
+
+            // 2. Drop the indexes that reference kuesioner_id
             $table->dropUnique(['kuesioner_id', 'urutan']);
             $table->dropIndex('pertanyaans_kuesioner_active_urutan_idx');
             
-            // Drop foreign key
-            $table->dropForeign(['kuesioner_id']);
-            
-            // Drop column
+            // 3. Finally, drop the column
             $table->dropColumn('kuesioner_id');
         });
     }
