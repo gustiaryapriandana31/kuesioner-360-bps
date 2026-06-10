@@ -6,6 +6,7 @@ import Button from '../atoms/Button';
 import ProgressBar from '../atoms/ProgressBar';
 import QuestionCard from '../molecules/QuestionCard';
 import SaveBanner from '../molecules/SaveBanner';
+import ThemeToggle from '../atoms/ThemeToggle';
 
 export default function QuestionnaireForm({
     employee,
@@ -29,6 +30,8 @@ export default function QuestionnaireForm({
     // AutoAdvance — dikontrol dari parent (Show.jsx) agar persist antar pegawai
     autoAdvance = false,
     onAutoAdvanceChange,
+    theme = 'dark',
+    onToggleTheme,
 }) {
     const [questionDirection, setQuestionDirection] = useState(1);
     const [editingQuestionId, setEditingQuestionId] = useState(null);
@@ -162,6 +165,8 @@ export default function QuestionnaireForm({
         }
     };
 
+    const isLight = theme === 'light';
+
     return (
         <main className="mx-auto w-full max-w-6xl px-4 py-0 sm:px-6 lg:px-8">
             {/* SaveBanner di atas form, slide down dari atas */}
@@ -170,6 +175,7 @@ export default function QuestionnaireForm({
                 savedName={saveBanner.savedName}
                 nextName={saveBanner.nextName}
                 onDismiss={onSaveBannerDismiss}
+                theme={theme}
             />
 
             <div className="px-0 py-5 sm:py-6">
@@ -180,16 +186,17 @@ export default function QuestionnaireForm({
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.25 }}
                         className={[
-                            'mb-5 rounded-lg border px-4 py-3',
-                            isResponseSubmitted
-                                ? 'border-cyan-500/30 bg-cyan-900/35'
-                                : 'border-amber-500/30 bg-amber-900/50',
+                            'mb-5 px-4 py-3 transition-colors duration-300 font-bold',
+                            isLight
+                                ? isResponseSubmitted
+                                    ? 'border-2 border-black bg-[#B2EBF2] text-black shadow-[2px_2px_0px_0px_#000] rounded-md font-bold'
+                                    : 'border-2 border-black bg-[#FFE082] text-black shadow-[2px_2px_0px_0px_#000] rounded-md font-bold'
+                                : isResponseSubmitted
+                                    ? 'rounded-lg border border-cyan-500/30 bg-cyan-900/35 text-cyan-200'
+                                    : 'rounded-lg border border-amber-500/30 bg-amber-900/50 text-amber-200',
                         ].join(' ')}
                     >
-                        <p className={[
-                            'text-sm font-semibold leading-6',
-                            isResponseSubmitted ? 'text-cyan-200' : 'text-amber-200',
-                        ].join(' ')}>
+                        <p className="text-sm leading-6">
                             {isResponseSubmitted
                                 ? 'Mode Pratinjau - Penilaian ini sudah dikirim final (submitted)'
                                 : 'Mode Pratinjau - Penilaian ini sudah tersimpan sebagai draft dan masih bisa diedit per soal'}
@@ -200,11 +207,13 @@ export default function QuestionnaireForm({
                 {/* Header: breadcrumb + info pegawai */}
                 <div className="mb-5 flex flex-col gap-4 sm:mb-6 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0">
-                        <nav className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 sm:text-sm">
+                        <nav className={`flex flex-wrap items-center gap-2 text-xs font-bold uppercase transition-colors duration-300 ${isLight ? 'text-black/60' : 'text-slate-500'} sm:text-sm`}>
                             <button
                                 type="button"
                                 onClick={handleBackToPeriod}
-                                className="rounded-md text-cyan-300 outline-none transition-colors hover:text-cyan-100 focus-visible:ring-2 focus-visible:ring-cyan-400"
+                                className={`rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+                                    isLight ? 'text-[#FF6B00] hover:text-[#E05300]' : 'text-cyan-300 hover:text-cyan-100'
+                                }`}
                             >
                                 Kuesioner 360
                             </button>
@@ -212,32 +221,41 @@ export default function QuestionnaireForm({
                             <button
                                 type="button"
                                 onClick={handleBackToEmployee}
-                                className="rounded-md text-cyan-300 outline-none transition-colors hover:text-cyan-100 focus-visible:ring-2 focus-visible:ring-cyan-400"
+                                className={`rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+                                    isLight ? 'text-[#FF6B00] hover:text-[#E05300]' : 'text-cyan-300 hover:text-cyan-100'
+                                }`}
                             >
                                 {selectedPeriod?.code}
                             </button>
                             <span>/</span>
-                            <span className="text-slate-300">{employee.name}</span>
+                            <span className={isLight ? 'text-black' : 'text-slate-300'}>{employee.name}</span>
                         </nav>
 
                         <div className="mt-4 flex flex-col gap-3 sm:mt-5 sm:flex-row sm:items-center sm:gap-4">
-                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br from-purple-950 via-gray-900 to-cyan-950 text-4xl sm:h-20 sm:w-20 sm:text-5xl">
+                            <div className={`flex h-16 w-16 shrink-0 items-center justify-center text-4xl sm:h-20 sm:w-20 sm:text-5xl transition-all duration-300 ${
+                                isLight
+                                    ? 'border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000] rounded-md'
+                                    : 'rounded-lg border border-white/10 bg-gradient-to-br from-purple-950 via-gray-900 to-cyan-950'
+                            }`}>
                                 {employee.avatar}
                             </div>
                             <div className="min-w-0">
-                                <h1 className="text-2xl font-black leading-tight text-slate-100 sm:text-3xl">
+                                <h1 className={`text-2xl font-black leading-tight sm:text-3xl transition-colors duration-300 ${isLight ? 'text-black' : 'text-slate-100'}`}>
                                     {employee.name}
                                 </h1>
-                                <p className="mt-1 text-sm font-semibold leading-6 text-purple-200">
+                                <p className={`mt-1 text-sm font-black uppercase leading-6 transition-colors duration-300 ${isLight ? 'text-[#FF6B00]' : 'text-purple-200'}`}>
                                     {employee.position} - {employee.department}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <Button variant="secondary" className="w-full sm:w-auto" onClick={handleBackToEmployee}>
-                        Kembali ke Daftar Pegawai
-                    </Button>
+                    <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3 w-full sm:w-auto">
+                        <Button variant="secondary" className="w-full sm:w-auto" onClick={handleBackToEmployee} theme={theme}>
+                            Kembali ke Daftar Pegawai
+                        </Button>
+                        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+                    </div>
                 </div>
 
                 {/* Progress pegawai, progress soal, dan toggle auto-advance */}
@@ -245,35 +263,48 @@ export default function QuestionnaireForm({
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.32, ease: 'easeOut' }}
-                    className="mb-5 rounded-lg border border-purple-500/20 bg-gray-900 p-4 shadow-xl shadow-black/25 sm:p-5"
+                    className={[
+                        'mb-5 p-4 shadow-xl transition-all duration-300 sm:p-5',
+                        isLight
+                            ? 'border-4 border-black bg-white shadow-[6px_6px_0px_0px_#000] text-black'
+                            : 'rounded-lg border border-purple-500/20 bg-gray-900 shadow-black/25'
+                    ].join(' ')}
                 >
                     <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                         <div className="grid flex-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <p className="text-xs font-bold uppercase tracking-wide text-purple-300 sm:text-sm">
+                                <p className={[
+                                    'text-xs font-bold uppercase tracking-wide sm:text-sm transition-colors duration-300',
+                                    isLight ? 'text-[#FF6B00]' : 'text-purple-300'
+                                ].join(' ')}>
                                     Progress Pegawai
                                 </p>
-                                <p className="mt-1 text-sm text-slate-500">
+                                <p className={`mt-1 text-sm transition-colors duration-300 ${isLight ? 'text-gray-600' : 'text-slate-500'}`}>
                                     {employeeProgressCompleted} dari {employeeProgressTotal} pegawai dinilai ({Math.round(employeeProgressPercentage)}%)
                                 </p>
                                 <ProgressBar
                                     value={employeeProgressPercentage}
                                     showLabel={false}
                                     className="mt-3"
+                                    theme={theme}
                                 />
                             </div>
 
                             <div>
-                                <p className="text-xs font-bold uppercase tracking-wide text-purple-300 sm:text-sm">
+                                <p className={[
+                                    'text-xs font-bold uppercase tracking-wide sm:text-sm transition-colors duration-300',
+                                    isLight ? 'text-[#FF6B00]' : 'text-purple-300'
+                                ].join(' ')}>
                                     Progress Soal
                                 </p>
-                                <p className="mt-1 text-sm text-slate-500">
+                                <p className={`mt-1 text-sm transition-colors duration-300 ${isLight ? 'text-gray-600' : 'text-slate-500'}`}>
                                     {answeredCount} dari {totalQuestions} soal terjawab ({Math.round(questionProgress)}%)
                                 </p>
                                 <ProgressBar
                                     value={questionProgress}
                                     showLabel={false}
                                     className="mt-3"
+                                    theme={theme}
                                 />
                             </div>
                         </div>
@@ -286,17 +317,21 @@ export default function QuestionnaireForm({
                                 whileHover={{ scale: 1.02, y: -1 }}
                                 whileTap={{ scale: 0.98 }}
                                 className={[
-                                    'flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-2.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 xl:w-auto',
-                                    autoAdvance
-                                        ? 'border-emerald-400/35 bg-emerald-500/10'
-                                        : 'border-slate-600/40 bg-gray-950',
+                                    'flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left outline-none transition-all duration-300 xl:w-auto',
+                                    isLight
+                                        ? autoAdvance
+                                            ? 'border-2 border-black bg-[#C8E6C9] text-black shadow-[2px_2px_0px_0px_#000] rounded-md'
+                                            : 'border-2 border-black bg-white text-black shadow-[2px_2px_0px_0px_#000] rounded-md hover:bg-black/5'
+                                        : autoAdvance
+                                            ? 'rounded-lg border border-emerald-400/35 bg-emerald-500/10 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950'
+                                            : 'rounded-lg border border-slate-600/40 bg-gray-950 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
                                 ].join(' ')}
                                 aria-pressed={autoAdvance}
                             >
-                                <span className="text-sm font-bold text-slate-300">
+                                <span className={`text-sm font-bold transition-colors duration-300 ${isLight ? 'text-black' : 'text-slate-300'}`}>
                                     Pilih otomatis lanjut
                                 </span>
-                                <Badge variant={autoAdvance ? 'success' : 'default'}>
+                                <Badge variant={autoAdvance ? 'success' : 'default'} theme={theme}>
                                     {autoAdvance ? 'ON' : 'OFF'}
                                 </Badge>
                             </motion.button>
@@ -324,6 +359,7 @@ export default function QuestionnaireForm({
                                         selectedScore={score}
                                         onScoreSelect={(val) => handlePreviewScoreSelect(question.id, val)}
                                         isPreview={!isEditingThis}
+                                        theme={theme}
                                     />
 
                                     {/* Tombol edit di bawah kartu pertanyaan jika draft */}
@@ -335,6 +371,7 @@ export default function QuestionnaireForm({
                                                     size="sm"
                                                     disabled={isSavingPreviewAnswer}
                                                     onClick={() => setEditingQuestionId(null)}
+                                                    theme={theme}
                                                 >
                                                     Batal Edit
                                                 </Button>
@@ -343,6 +380,7 @@ export default function QuestionnaireForm({
                                                     variant="secondary"
                                                     size="sm"
                                                     onClick={() => setEditingQuestionId(question.id)}
+                                                    theme={theme}
                                                 >
                                                     Edit Poin Soal Ini
                                                 </Button>
@@ -363,6 +401,7 @@ export default function QuestionnaireForm({
                             onScoreSelect={handleScoreSelect}
                             direction={questionDirection}
                             isPreview={false}
+                            theme={theme}
                         />
 
                         {/* Navigasi bawah */}
@@ -372,6 +411,7 @@ export default function QuestionnaireForm({
                                 className="w-full sm:w-auto"
                                 disabled={isFirstQuestion || isSavingPreviewAnswer}
                                 onClick={goPrevious}
+                                theme={theme}
                             >
                                 Sebelumnya
                             </Button>
@@ -383,6 +423,7 @@ export default function QuestionnaireForm({
                                         className="w-full sm:w-auto"
                                         disabled={!selectedScore || isSavingPreviewAnswer}
                                         onClick={goNext}
+                                        theme={theme}
                                     >
                                         Selanjutnya
                                     </Button>

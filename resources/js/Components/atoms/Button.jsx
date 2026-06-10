@@ -8,6 +8,13 @@ const variantClasses = {
     ghost: 'text-slate-300 hover:bg-gray-800/80 hover:text-white',
 };
 
+const lightVariantClasses = {
+    primary: 'bg-[#FF6B00] text-black border-2 border-black font-extrabold shadow-[2px_2px_0px_0px_#000] hover:shadow-[1px_1px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] rounded-md transition-all',
+    secondary: 'bg-white text-black border-2 border-black font-extrabold shadow-[2px_2px_0px_0px_#000] hover:shadow-[1px_1px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] rounded-md transition-all',
+    danger: 'bg-red-500 text-white border-2 border-black font-extrabold shadow-[2px_2px_0px_0px_#000] hover:shadow-[1px_1px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] rounded-md transition-all',
+    ghost: 'text-black font-bold hover:bg-black/5 rounded-md',
+};
+
 const sizeClasses = {
     sm: 'min-h-9 px-3 py-2 text-sm',
     md: 'min-h-11 px-5 py-2.5 text-sm',
@@ -23,8 +30,10 @@ export default function Button({
     loading = false,
     className = '',
     onClick,
+    theme = 'dark',
 }) {
     const isDisabled = disabled || loading;
+    const currentVariantClasses = theme === 'light' ? lightVariantClasses[variant] : variantClasses[variant];
 
     return (
         <motion.button
@@ -35,15 +44,16 @@ export default function Button({
             whileTap={isDisabled ? undefined : { scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 420, damping: 26 }}
             className={[
-                'inline-flex max-w-full items-center justify-center gap-2 rounded-lg text-center font-semibold leading-tight outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
-                variantClasses[variant],
+                'inline-flex max-w-full items-center justify-center gap-2 rounded-lg text-center font-semibold leading-tight outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2',
+                theme === 'light' ? 'focus-visible:ring-offset-white' : 'focus-visible:ring-offset-gray-950',
+                currentVariantClasses,
                 sizeClasses[size],
                 isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
                 className,
             ].join(' ')}
         >
             {loading && (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                <span className={`h-4 w-4 animate-spin rounded-full border-2 ${theme === 'light' ? 'border-black/40 border-t-black' : 'border-white/40 border-t-white'}`} />
             )}
             <span className="min-w-0">{children}</span>
         </motion.button>

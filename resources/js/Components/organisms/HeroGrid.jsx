@@ -1,7 +1,7 @@
-// Organism grid kartu pegawai dengan breadcrumb dan tracker periode.
 import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import Button from '../atoms/Button';
+import ThemeToggle from '../atoms/ThemeToggle';
 import ProgressTracker from './ProgressTracker';
 
 const containerVariants = {
@@ -28,10 +28,13 @@ export default function HeroGrid({
     selectedPeriod,
     onSelectEmployee,
     onBackToPeriod,
+    theme = 'dark',
+    onToggleTheme,
 }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'undone', 'done'
     const [visibleCount, setVisibleCount] = useState(30);
+    const isLight = theme === 'light';
 
     const completedSet = new Set(completedEmployees);
     const overallProgress = employees.length > 0 ? (completedEmployees.length / employees.length) * 100 : 0;
@@ -65,27 +68,38 @@ export default function HeroGrid({
         <main className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             <div className="mb-5 flex flex-col gap-4 sm:mb-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
-                    <nav className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 sm:text-sm">
+                    <nav className={`flex flex-wrap items-center gap-2 text-xs font-semibold sm:text-sm ${
+                        isLight ? 'text-gray-500' : 'text-slate-500'
+                    }`}>
                         <button
                             type="button"
                             onClick={onBackToPeriod}
-                            className="rounded-md text-cyan-300 outline-none transition-colors hover:text-cyan-100 focus-visible:ring-2 focus-visible:ring-cyan-400"
+                            className={`rounded-md outline-none transition-colors ${
+                                isLight 
+                                    ? 'text-[#FF6B00] hover:text-[#FF8533] focus-visible:ring-2 focus-visible:ring-black' 
+                                    : 'text-cyan-300 hover:text-cyan-100 focus-visible:ring-2 focus-visible:ring-cyan-400'
+                            }`}
                         >
                             Kuesioner 360
                         </button>
                         <span>›</span>
-                        <span className="text-slate-300">
+                        <span className={isLight ? 'text-gray-800 font-bold' : 'text-slate-300'}>
                             {selectedPeriod?.code} - {selectedPeriod?.month}
                         </span>
                     </nav>
-                    <h1 className="mt-3 text-2xl font-black leading-tight text-slate-100 sm:mt-4 sm:text-4xl">
+                    <h1 className={`mt-3 text-2xl font-black leading-tight sm:mt-4 sm:text-4xl ${
+                        isLight ? 'text-black' : 'text-slate-100'
+                    }`}>
                         Pilih Pegawai yang Akan Dinilai
                     </h1>
                 </div>
 
-                <Button variant="secondary" className="w-full sm:w-auto" onClick={onBackToPeriod}>
-                    ← Kembali ke Daftar Periode
-                </Button>
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+                    <Button variant="secondary" className="w-full sm:w-auto" onClick={onBackToPeriod} theme={theme}>
+                        ← Kembali ke Daftar Periode
+                    </Button>
+                </div>
             </div>
 
             <ProgressTracker
@@ -93,10 +107,11 @@ export default function HeroGrid({
                 completedEmployees={completedEmployees}
                 overallProgress={overallProgress}
                 selectedPeriod={selectedPeriod}
+                theme={theme}
             />
 
             {/* Search and Filter Row */}
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="relative flex-1">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
                         🔍
@@ -109,11 +124,17 @@ export default function HeroGrid({
                             setSearchQuery(e.target.value);
                             setVisibleCount(30);
                         }}
-                        className="w-full rounded-lg border border-slate-800 bg-slate-900/60 py-2.5 pl-10 pr-4 text-sm font-medium text-slate-200 placeholder-slate-500 outline-none transition-all duration-200 focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/30"
+                        className={`w-full py-2.5 pl-10 pr-4 text-sm font-medium outline-none transition-all duration-200 ${
+                            isLight
+                                ? 'border-2 border-black bg-white text-black placeholder-gray-500 shadow-[2px_2px_0px_0px_#000] focus:border-[#FF6B00]'
+                                : 'rounded-lg border border-slate-800 bg-slate-900/60 text-slate-200 placeholder-slate-500 focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/30'
+                        }`}
                     />
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
+                    <span className={`text-xs font-bold uppercase tracking-wider whitespace-nowrap ${
+                        isLight ? 'text-black' : 'text-slate-500'
+                    }`}>
                         Filter Status:
                     </span>
                     <select
@@ -122,7 +143,11 @@ export default function HeroGrid({
                             setStatusFilter(e.target.value);
                             setVisibleCount(30);
                         }}
-                        className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2.5 text-sm font-semibold text-slate-200 outline-none transition-all duration-200 focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/30 cursor-pointer"
+                        className={`px-3 py-2.5 text-sm font-semibold outline-none transition-all duration-200 cursor-pointer ${
+                            isLight
+                                ? 'border-2 border-black bg-white text-black shadow-[2px_2px_0px_0px_#000] focus:border-[#FF6B00]'
+                                : 'rounded-lg border border-slate-800 bg-slate-900/60 text-slate-200 focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/30'
+                        }`}
                     >
                         <option value="all">Semua Pegawai</option>
                         <option value="undone">Belum Dinilai</option>
@@ -132,10 +157,14 @@ export default function HeroGrid({
             </div>
 
             {filteredEmployees.length === 0 ? (
-                <div className="mt-8 flex flex-col items-center justify-center rounded-lg border border-slate-800 bg-slate-900/30 p-10 text-center">
+                <div className={`mt-8 flex flex-col items-center justify-center p-10 text-center transition-all ${
+                    isLight
+                        ? 'border-4 border-black bg-[#FFE082] shadow-[4px_4px_0px_0px_#000]'
+                        : 'rounded-lg border border-slate-800 bg-slate-900/30'
+                }`}>
                     <span className="text-4xl mb-3">🔍</span>
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wide">Tidak ada pegawai yang cocok</p>
-                    <p className="text-xs text-slate-500 mt-1">Coba periksa ejaan atau ganti filter status penilaian Anda.</p>
+                    <p className={`text-sm font-black uppercase tracking-wide ${isLight ? 'text-black' : 'text-slate-400'}`}>Tidak ada pegawai yang cocok</p>
+                    <p className={`text-xs mt-1 ${isLight ? 'text-gray-700 font-semibold' : 'text-slate-500'}`}>Coba periksa ejaan atau ganti filter status penilaian Anda.</p>
                 </div>
             ) : (
                 <>
@@ -154,32 +183,44 @@ export default function HeroGrid({
                                     type="button"
                                     variants={itemVariants}
                                     onClick={() => onSelectEmployee?.(employee)}
-                                    whileHover={{ scale: 1.025, y: -2 }}
+                                    whileHover={isLight ? { scale: 1.015, translate: [2, 2] } : { scale: 1.025, y: -2 }}
                                     whileTap={{ scale: 0.97 }}
                                     transition={{ type: 'spring', stiffness: 380, damping: 22 }}
                                     className={[
-                                        'group flex min-h-36 flex-col items-center justify-center gap-2 rounded-lg border bg-gray-900 p-3 text-center outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 sm:min-h-40 sm:p-4',
-                                        isCompleted
-                                            ? 'border-emerald-500/20 hover:border-emerald-400/50 hover:shadow-[0_0_20px_rgba(52,211,153,0.15)]'
-                                            : 'border-purple-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]',
+                                        'group flex min-h-36 flex-col items-center justify-center gap-2 p-3 text-center outline-none transition-all duration-200 sm:min-h-40 sm:p-4',
+                                        isLight
+                                            ? 'rounded-none border-4 border-black'
+                                            : 'rounded-lg border bg-gray-900 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
+                                        isLight
+                                            ? isCompleted
+                                                ? 'bg-[#E8F5E9] shadow-[4px_4px_0px_0px_#000] hover:shadow-[1px_1px_0px_0px_#000]'
+                                                : 'bg-white shadow-[4px_4px_0px_0px_#000] hover:shadow-[1px_1px_0px_0px_#000]'
+                                            : isCompleted
+                                                ? 'border-emerald-500/20 hover:border-emerald-400/50 hover:shadow-[0_0_20px_rgba(52,211,153,0.15)]'
+                                                : 'border-purple-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]',
+                                        isLight ? 'focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white' : ''
                                     ].join(' ')}
                                 >
                                     <span className="text-3xl sm:text-4xl">{employee.avatar}</span>
 
-                                    <span className="line-clamp-2 text-xs font-bold leading-snug text-slate-200 sm:text-sm">
+                                    <span className={`line-clamp-2 text-xs font-bold leading-snug sm:text-sm ${
+                                        isLight ? 'text-black' : 'text-slate-200'
+                                    }`}>
                                         {employee.name}
                                     </span>
 
-                                    <span className={[
-                                        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
-                                        isCompleted
-                                            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                                            : 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300',
-                                    ].join(' ')}>
+                                    <Badge
+                                        variant={isCompleted ? 'success' : 'info'}
+                                        theme={theme}
+                                    >
                                         {isCompleted ? 'Draft' : 'Belum'} {isCompleted ? '✓' : ''}
-                                    </span>
+                                    </Badge>
 
-                                    <span className="text-[10px] font-semibold text-cyan-400 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                                    <span className={`text-[10px] font-black uppercase tracking-wide opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 ${
+                                        isLight 
+                                            ? isCompleted ? 'text-emerald-700' : 'text-[#FF6B00]'
+                                            : 'text-cyan-400'
+                                    }`}>
                                         {isCompleted ? 'Pratinjau →' : 'Nilai →'}
                                     </span>
                                 </motion.button>
@@ -192,7 +233,10 @@ export default function HeroGrid({
                             <Button
                                 variant="secondary"
                                 onClick={() => setVisibleCount((prev) => prev + 30)}
-                                className="px-6 py-2.5 font-bold text-cyan-300 hover:text-cyan-100 hover:bg-cyan-950/20"
+                                className={`px-6 py-2.5 font-bold ${
+                                    isLight ? 'text-black' : 'text-cyan-300 hover:text-cyan-100 hover:bg-cyan-950/20'
+                                }`}
+                                theme={theme}
                             >
                                 Muat Lebih Banyak ({filteredEmployees.length - visibleCount} lagi)
                             </Button>

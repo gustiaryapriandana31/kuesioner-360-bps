@@ -2,7 +2,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 
-export default function SaveBanner({ show, savedName, nextName, onDismiss }) {
+export default function SaveBanner({ show, savedName, nextName, onDismiss, theme = 'dark' }) {
     // Auto dismiss setelah 4 detik
     useEffect(() => {
         if (!show) return;
@@ -14,6 +14,8 @@ export default function SaveBanner({ show, savedName, nextName, onDismiss }) {
         return () => window.clearTimeout(timer);
     }, [show, savedName]);
 
+    const isLight = theme === 'light';
+
     return (
         <AnimatePresence>
             {show && (
@@ -23,17 +25,31 @@ export default function SaveBanner({ show, savedName, nextName, onDismiss }) {
                     animate={{ y: '0%', opacity: 1 }}
                     exit={{ y: '-100%', opacity: 0 }}
                     transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-                    className="sticky top-0 z-40 w-full border-b border-emerald-500/50 bg-emerald-900/75 backdrop-blur-sm"
+                    className={[
+                        'sticky top-0 z-40 w-full transition-all duration-300',
+                        isLight
+                            ? 'border-b-4 border-black bg-[#C8E6C9]'
+                            : 'border-b border-emerald-500/50 bg-emerald-900/75 backdrop-blur-sm'
+                    ].join(' ')}
                 >
                     <div className="mx-auto flex max-w-6xl items-start justify-between gap-3 px-4 py-3 sm:items-center sm:px-6">
-                        <p className="min-w-0 text-sm font-semibold leading-6 text-emerald-100">
+                        <p className={[
+                            'min-w-0 text-sm font-bold leading-6',
+                            isLight ? 'text-black' : 'text-emerald-100'
+                        ].join(' ')}>
                             ✅ Penilaian{' '}
-                            <span className="font-black text-white">{savedName}</span>{' '}
+                            <span className={[
+                                'font-black',
+                                isLight ? 'text-black underline decoration-2' : 'text-white'
+                            ].join(' ')}>{savedName}</span>{' '}
                             tersimpan!
                             {nextName && (
                                 <>
                                     {' '}Sekarang menilai:{' '}
-                                    <span className="font-black text-cyan-200">{nextName}</span>
+                                    <span className={[
+                                        'font-black',
+                                        isLight ? 'text-black bg-[#B2EBF2] border-2 border-black px-1.5 py-0.5 rounded shadow-[1px_1px_0px_0px_#000]' : 'text-cyan-200'
+                                    ].join(' ')}>{nextName}</span>
                                 </>
                             )}
                         </p>
@@ -41,7 +57,12 @@ export default function SaveBanner({ show, savedName, nextName, onDismiss }) {
                         <button
                             type="button"
                             onClick={onDismiss}
-                            className="shrink-0 rounded-md p-1.5 text-emerald-300 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-400"
+                            className={[
+                                'shrink-0 rounded-md p-1.5 outline-none transition-colors focus-visible:ring-2',
+                                isLight
+                                    ? 'text-black hover:text-[#FF6B00] focus-visible:ring-black'
+                                    : 'text-emerald-300 hover:text-white focus-visible:ring-emerald-400'
+                            ].join(' ')}
                             aria-label="Tutup banner"
                         >
                             <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

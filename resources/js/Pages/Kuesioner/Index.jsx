@@ -1,4 +1,4 @@
-// Page daftar periode Kuesioner 360 yang memakai data Inertia dari backend.
+import { useState, useEffect } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
 import PeriodSelectTemplate from '../../Components/templates/PeriodSelectTemplate';
@@ -8,6 +8,22 @@ export default function Index({
     completedData = {},
     totalEmployees = 0,
 }) {
+    const [theme, setTheme] = useState(() => {
+        try {
+            return localStorage.getItem('kuesioner:theme') || 'dark';
+        } catch {
+            return 'dark';
+        }
+    });
+
+    const handleToggleTheme = () => {
+        const nextTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(nextTheme);
+        try {
+            localStorage.setItem('kuesioner:theme', nextTheme);
+        } catch {}
+    };
+
     const handleSelectPeriod = (period) => {
         if (period.status === 'unavailable') {
             return;
@@ -20,7 +36,7 @@ export default function Index({
         <>
             <Head title="Kuesioner 360" />
 
-            <div className="min-h-svh bg-gray-950">
+            <div className={`min-h-svh transition-colors duration-300 ${theme === 'light' ? 'bg-[#FFFDF6]' : 'bg-gray-950'}`}>
                 <AnimatePresence mode="wait">
                     <PeriodSelectTemplate
                         key="period-select"
@@ -28,6 +44,8 @@ export default function Index({
                         completedData={completedData}
                         totalEmployees={totalEmployees}
                         onSelectPeriod={handleSelectPeriod}
+                        theme={theme}
+                        onToggleTheme={handleToggleTheme}
                     />
                 </AnimatePresence>
             </div>

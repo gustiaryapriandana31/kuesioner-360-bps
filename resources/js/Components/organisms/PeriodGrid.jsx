@@ -26,11 +26,13 @@ export default function PeriodGrid({
     completedData = {},
     totalEmployees = 5,
     onSelectPeriod,
+    theme = 'dark',
 }) {
     const completedCount = periods.filter((period) => period.status === 'completed').length;
     const activeCount = periods.filter((period) => period.status === 'active').length;
     const unavailableCount = periods.filter((period) => period.status === 'unavailable').length;
     const safeTotalEmployees = Math.max(Number(totalEmployees) || 0, 0);
+    const isLight = theme === 'light';
 
     return (
         <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -40,21 +42,39 @@ export default function PeriodGrid({
                 transition={{ duration: 0.38, ease: 'easeOut' }}
                 className="mb-6 sm:mb-8"
             >
-                <h2 className="text-2xl font-black leading-tight text-slate-100 sm:text-3xl">
+                <h2 className={`text-2xl font-black leading-tight sm:text-3xl ${isLight ? 'text-black' : 'text-slate-100'}`}>
                     Daftar Periode Penilaian
                 </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500 sm:text-base sm:leading-7">
+                <p className={`mt-3 max-w-3xl text-sm leading-6 sm:text-base sm:leading-7 ${isLight ? 'text-gray-700' : 'text-slate-500'}`}>
                     Pilih periode yang sedang aktif atau buka periode selesai untuk melihat status penilaian Anda.
                 </p>
 
-                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-2xl">
-                    <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-200">
+                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:max-w-2xl">
+                    <div
+                        className={`px-4 py-3 text-sm font-black transition-all ${
+                            isLight
+                                ? 'border-2 border-black bg-[#81C784] text-black shadow-[2px_2px_0px_0px_#000] rounded-md'
+                                : 'rounded-lg border border-emerald-500/25 bg-emerald-500/10 text-emerald-200'
+                        }`}
+                    >
                         {completedCount} Selesai
                     </div>
-                    <div className="rounded-lg border border-cyan-500/25 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-200">
+                    <div
+                        className={`px-4 py-3 text-sm font-black transition-all ${
+                            isLight
+                                ? 'border-2 border-black bg-[#FFCA28] text-black shadow-[2px_2px_0px_0px_#000] rounded-md'
+                                : 'rounded-lg border border-cyan-500/25 bg-cyan-500/10 text-cyan-200'
+                        }`}
+                    >
                         {activeCount} Aktif
                     </div>
-                    <div className="rounded-lg border border-slate-500/20 bg-slate-700/20 px-4 py-3 text-sm font-bold text-slate-400">
+                    <div
+                        className={`px-4 py-3 text-sm font-black transition-all ${
+                            isLight
+                                ? 'border-2 border-black bg-gray-200 text-gray-600 opacity-60 rounded-md'
+                                : 'rounded-lg border border-slate-500/20 bg-slate-700/20 text-slate-400'
+                        }`}
+                    >
                         {unavailableCount} Belum Tersedia
                     </div>
                 </div>
@@ -89,6 +109,7 @@ export default function PeriodGrid({
                                     percent: progressPercent,
                                 }}
                                 onClick={onSelectPeriod}
+                                theme={theme}
                             />
                         </motion.div>
                     );

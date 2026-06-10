@@ -37,6 +37,22 @@ export default function Show({
     const [nextEmployeePrompt, setNextEmployeePrompt] = useState(null);
 
     // ─── State baru ──────────────────────────────────────────────────────────
+    const [theme, setTheme] = useState(() => {
+        try {
+            return localStorage.getItem('kuesioner:theme') || 'dark';
+        } catch {
+            return 'dark';
+        }
+    });
+
+    const handleToggleTheme = () => {
+        const nextTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(nextTheme);
+        try {
+            localStorage.setItem('kuesioner:theme', nextTheme);
+        } catch {}
+    };
+
     // Daftar pegawai yang sudah punya draft/submitted (inisialisasi dari server)
     const [completedDrafts, setCompletedDrafts] = useState(initialCompletedDrafts);
     const [allDraftsComplete, setAllDraftsComplete] = useState(initialAllDraftsComplete || kuesioner.status === 'completed');
@@ -156,7 +172,7 @@ export default function Show({
         : false;
 
     const handleSelectEmployee = async (employee) => {
-        // Dari AllDraftCompleteScreen atau HeroGrid — bisa preview jika sudah draft atau kuesioner selesai
+        // Dari AllDraftCompleteScreen or HeroGrid — bisa preview jika sudah draft atau kuesioner selesai
         const alreadyDraft = completedDrafts.includes(employee.id);
 
         if (alreadyDraft || kuesioner.status === 'completed') {
@@ -345,6 +361,7 @@ export default function Show({
     };
 
     const isClosedAndEmpty = kuesioner.status === 'completed' && employees.length === 0;
+    const isLight = theme === 'light';
 
     // ─── Render ──────────────────────────────────────────────────────────────
     return (
@@ -358,31 +375,40 @@ export default function Show({
                 nextName={savingNextName}
             />
 
-            <div className="min-h-svh bg-gray-950">
+            <div className={`min-h-svh transition-colors duration-300 ${isLight ? 'bg-[#FFFDF6]' : 'bg-gray-950'}`}>
                 {isClosedAndEmpty ? (
-                    <div className="flex min-h-svh flex-col items-center justify-center p-6 text-slate-200">
+                    <div className={`flex min-h-svh flex-col items-center justify-center p-6 ${isLight ? 'text-black' : 'text-slate-200'}`}>
                         <motion.div
                             initial={{ opacity: 0, scale: 0.97, y: 12 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="w-full max-w-md rounded-lg border border-amber-500/20 bg-gray-900 p-6 text-center shadow-2xl shadow-black/40 flex flex-col items-center"
+                            className={`w-full max-w-md p-6 text-center flex flex-col items-center transition-all ${
+                                isLight
+                                    ? 'border-4 border-black bg-[#FFE082] shadow-[6px_6px_0px_0px_#000] text-black'
+                                    : 'rounded-lg border border-amber-500/20 bg-gray-900 shadow-2xl shadow-black/40'
+                            }`}
                         >
-                            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-amber-500/35 bg-amber-500/10 text-3xl shadow-[0_0_24px_rgba(245,158,11,0.12)]">
+                            <div className={`mb-5 flex h-16 w-16 items-center justify-center rounded-full border text-3xl transition-all ${
+                                isLight
+                                    ? 'border-2 border-black bg-white shadow-[2px_2px_0px_0px_#000]'
+                                    : 'border-amber-500/35 bg-amber-500/10 shadow-[0_0_24px_rgba(245,158,11,0.12)]'
+                            }`}>
                                 ⚠️
                             </div>
-                            <h2 className="text-lg font-black text-slate-100 uppercase tracking-wide">
+                            <h2 className={`text-lg font-black uppercase tracking-wide ${isLight ? 'text-black' : 'text-slate-100'}`}>
                                 Belum Ada Data Response
                             </h2>
-                            <p className="mt-4 text-sm font-bold leading-relaxed text-amber-200 uppercase">
+                            <p className={`mt-4 text-sm font-bold leading-relaxed uppercase ${isLight ? 'text-black' : 'text-amber-200'}`}>
                                 BELUM ADA DATA RESPONSE YANG BISA DITAMPILKAN UNTUK KUESIONER INI
                             </p>
-                            <p className="mt-2 text-xs font-semibold text-slate-500">
+                            <p className={`mt-2 text-xs font-semibold ${isLight ? 'text-gray-600' : 'text-slate-500'}`}>
                                 Data respons kuesioner ini belum di-import dari Excel oleh admin.
                             </p>
                             <Button
                                 variant="secondary"
                                 className="mt-6 w-full"
                                 onClick={handleBackToPeriod}
+                                theme={theme}
                             >
                                 ← Kembali ke Daftar Periode
                             </Button>
@@ -399,6 +425,8 @@ export default function Show({
                                 onSelectEmployee={handleSelectEmployee}
                                 onBackToPeriod={handleBackToPeriod}
                                 completedDrafts={completedDrafts}
+                                theme={theme}
+                                onToggleTheme={handleToggleTheme}
                             />
                         )}
 
@@ -411,6 +439,8 @@ export default function Show({
                                 selectedPeriod={kuesioner}
                                 onSelectEmployee={handleSelectEmployee}
                                 onBackToPeriod={handleBackToPeriod}
+                                theme={theme}
+                                onToggleTheme={handleToggleTheme}
                             />
                         )}
 
@@ -436,6 +466,8 @@ export default function Show({
                                 onSaveBannerDismiss={handleSaveBannerDismiss}
                                 autoAdvance={autoAdvance}
                                 onAutoAdvanceChange={handleAutoAdvanceChange}
+                                theme={theme}
+                                onToggleTheme={handleToggleTheme}
                             />
                         )}
                     </AnimatePresence>
@@ -453,6 +485,7 @@ export default function Show({
                     remainingCount={Math.max(employees.length - completedDrafts.length, 0)}
                     onContinue={handleContinueToNextEmployee}
                     onBackToList={handleBackToEmployee}
+                    theme={theme}
                 />
             </div>
         </>

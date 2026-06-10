@@ -14,9 +14,23 @@ function gradientForValue(value) {
     return 'from-teal-500 to-emerald-500';
 }
 
-export default function ScoreButton({ value, isSelected = false, onClick, isPreview = false }) {
+function lightBgForValue(value) {
+    if (value <= 3) {
+        return 'bg-[#EF5350]';
+    }
+
+    if (value <= 6) {
+        return 'bg-[#FFCA28]';
+    }
+
+    return 'bg-[#66BB6A]';
+}
+
+export default function ScoreButton({ value, isSelected = false, onClick, isPreview = false, theme = 'dark' }) {
     const [ripples, setRipples] = useState([]);
     const gradient = gradientForValue(value);
+    const isLight = theme === 'light';
+    const lightBg = lightBgForValue(value);
 
     const handleClick = () => {
         if (isPreview) return; // Tidak bisa klik di preview mode
@@ -42,14 +56,23 @@ export default function ScoreButton({ value, isSelected = false, onClick, isPrev
             animate={isSelected ? { scale: 1.06 } : { scale: 1 }}
             transition={{ type: 'spring', stiffness: 430, damping: 22 }}
             className={[
-                'relative h-11 w-11 overflow-hidden rounded-full border text-sm font-black outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 sm:h-10 sm:w-10 md:h-11 md:w-11 lg:h-12 lg:w-12',
-                previewNonSelected
-                    ? 'cursor-not-allowed border-gray-700 bg-gray-900 text-gray-600 opacity-40'
-                    : previewSelected
-                        ? `pointer-events-none z-10 border-cyan-100/80 bg-gradient-to-br ${gradient} text-white shadow-[0_0_24px_rgba(45,212,191,0.55)] ring-2 ring-white/70`
-                        : isSelected
-                            ? `z-10 border-cyan-100/80 bg-gradient-to-br ${gradient} text-white shadow-[0_0_24px_rgba(45,212,191,0.55)] ring-2 ring-white/70`
-                            : 'border border-slate-700 bg-gray-950 text-slate-400 shadow-lg shadow-black/25 ring-1 ring-white/5 hover:border-slate-500 hover:bg-gray-900 hover:text-slate-200',
+                'relative h-11 w-11 overflow-hidden text-sm font-black outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 sm:h-10 sm:w-10 md:h-11 md:w-11 lg:h-12 lg:w-12',
+                isLight ? 'rounded-md focus-visible:ring-offset-white' : 'rounded-full focus-visible:ring-offset-gray-950',
+                isLight
+                    ? previewNonSelected
+                        ? 'cursor-not-allowed border-2 border-gray-300 bg-gray-100 text-gray-400 opacity-40 shadow-none'
+                        : previewSelected
+                            ? `pointer-events-none z-10 border-2 border-black ${lightBg} text-black shadow-[2px_2px_0px_0px_#000] ring-2 ring-black`
+                            : isSelected
+                                ? `z-10 border-2 border-black ${lightBg} text-black shadow-[2px_2px_0px_0px_#000] ring-2 ring-black`
+                                : 'border-2 border-black bg-white text-black shadow-[2px_2px_0px_0px_#000] hover:bg-[#FFE082] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_#000]'
+                    : previewNonSelected
+                        ? 'cursor-not-allowed border-gray-700 bg-gray-900 text-gray-600 opacity-40'
+                        : previewSelected
+                            ? `pointer-events-none z-10 border-cyan-100/80 bg-gradient-to-br ${gradient} text-white shadow-[0_0_24px_rgba(45,212,191,0.55)] ring-2 ring-white/70`
+                            : isSelected
+                                ? `z-10 border-cyan-100/80 bg-gradient-to-br ${gradient} text-white shadow-[0_0_24px_rgba(45,212,191,0.55)] ring-2 ring-white/70`
+                                : 'border border-slate-700 bg-gray-950 text-slate-400 shadow-lg shadow-black/25 ring-1 ring-white/5 hover:border-slate-500 hover:bg-gray-900 hover:text-slate-200',
             ].join(' ')}
             aria-pressed={isSelected}
             aria-label={`Nilai ${value}`}
