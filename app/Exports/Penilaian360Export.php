@@ -39,7 +39,6 @@ class Penilaian360Export implements FromArray, WithHeadings, WithStyles, WithCol
             ->whereNotIn('id', $excludedIds)
             ->get();
 
-        // Daftar urutan nama pegawai dari instruksi user
         $orderedNames = [
             1 => 'Akhmad Riza, S.E., M.M',
             2 => 'Maria Ulfa, S.ST',
@@ -75,11 +74,12 @@ class Penilaian360Export implements FromArray, WithHeadings, WithStyles, WithCol
             32 => 'Ade Ulfa Wahyuni, A.Md',
             33 => 'Hendra Febrianto, A.Md',
             34 => 'Sari Ratna Dewi, S.Si',
-            35 => 'Sapik',
-            36 => 'Irmalina',
-            37 => 'Rahmadi',
-            38 => 'Ferdian',
-            39 => 'Rian Maulana Saputra',
+            35 => 'Yolanda Rizkie Aprilia, S.Tr.Stat',
+            36 => 'Sapik',
+            37 => 'Irmalina',
+            38 => 'Rahmadi',
+            39 => 'Ferdian',
+            40 => 'Rian Maulana Saputra',
         ];
 
         // Fuzzy matching in-memory untuk mengurutkan active targets
@@ -148,7 +148,6 @@ class Penilaian360Export implements FromArray, WithHeadings, WithStyles, WithCol
             }
             
             if ($matchedPegawai) {
-                $pegawaiIndexMap[$matchedPegawai->id] = $idx;
                 $targetHeaderNames[$matchedPegawai->id] = $name;
                 if (isset($targetMap[$matchedPegawai->id])) {
                     $orderedTargets[] = $targetMap[$matchedPegawai->id];
@@ -158,16 +157,21 @@ class Penilaian360Export implements FromArray, WithHeadings, WithStyles, WithCol
         }
 
         // Jika ada target aktif yang tidak ada di list 39, masukkan di akhir
-        $nextIdx = 40;
         foreach ($allActiveTargets as $target) {
             if (!isset($matchedIds[$target->id])) {
                 $orderedTargets[] = $target;
-                $pegawaiIndexMap[$target->id] = $nextIdx++;
                 $targetHeaderNames[$target->id] = $target->nama;
             }
         }
 
         $this->activeTargets = collect($orderedTargets);
+
+        // Buat index urutan yang runtut (sequential) untuk target yang diexport
+        $pegawaiIndexMap = [];
+        foreach ($this->activeTargets as $index => $target) {
+            $pegawaiIndexMap[$target->id] = $index + 1;
+        }
+
         $this->pegawaiIndexMap = $pegawaiIndexMap;
         $this->targetHeaderNames = $targetHeaderNames;
 
