@@ -213,12 +213,12 @@ class Penilaian360Export implements FromArray, WithHeadings, WithStyles, WithCol
         // Ambil list penilai unik (dari response)
         $penilais = $this->responses->map(fn($r) => $r->penilai)->filter()->unique('id');
 
-        // Buat map dari penilai_id ke submitted_at paling awal
+        // Buat map dari penilai_id ke submitted_at paling akhir
         $penilaiSubmittedAt = [];
         foreach ($this->responses as $resp) {
             $penilaiId = $resp->penilai_id;
             if ($resp->submitted_at) {
-                if (!isset($penilaiSubmittedAt[$penilaiId]) || $resp->submitted_at->lt($penilaiSubmittedAt[$penilaiId])) {
+                if (!isset($penilaiSubmittedAt[$penilaiId]) || $resp->submitted_at->gt($penilaiSubmittedAt[$penilaiId])) {
                     $penilaiSubmittedAt[$penilaiId] = $resp->submitted_at;
                 }
             }
