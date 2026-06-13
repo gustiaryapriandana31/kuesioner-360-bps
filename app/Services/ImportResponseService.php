@@ -149,6 +149,9 @@ class ImportResponseService
 
                     if ($resp->wasRecentlyCreated) {
                         $stats['total_response']++;
+                    } else {
+                        $resp->submitted_at = $timestamp;
+                        $resp->save();
                     }
                     $responseIds[$targetId] = $resp->id;
                 }
